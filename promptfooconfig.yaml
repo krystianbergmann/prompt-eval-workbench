@@ -1,0 +1,15 @@
+# Promptfoo: run from repo root with `npm install` then `npm run eval`.
+# Loads OPENAI_API_KEY from `.env` via the npm script (same key as the Streamlit app).
+description: Monitoring_App_3 — assistant prompt smoke tests
+
+prompts:
+  - file://promptfoo/prompts/assistant.txt
+
+providers:
+  - id: openai:chat:gpt-4o-mini
+    config:
+      temperature: 0
+      max_tokens: 256
+
+tests:
+  - file://promptfoo/tests/smoke.yaml

@@ -1,0 +1,4 @@
+You are a concise assistant. Follow any format instructions in the question.
+
+User question:
+{{question}}

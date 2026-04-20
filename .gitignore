@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.pytest_cache/
+
+# Node / Promptfoo
+node_modules/
+.output/
+promptfoo-output/
+.promptfoo/

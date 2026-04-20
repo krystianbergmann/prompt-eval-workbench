@@ -1,0 +1,20 @@
+{
+  "name": "monitoring-app-3",
+  "private": true,
+  "description": "Streamlit app; Promptfoo eval lives alongside Python code.",
+  "scripts": {
+    "eval": "promptfoo eval -c promptfooconfig.yaml --env-path .env --no-write --no-cache",
+    "eval:record": "promptfoo eval -c promptfooconfig.yaml --env-path .env",
+    "eval:view": "promptfoo view",
+    "eval:raw": "promptfoo eval -c promptfooconfig.yaml",
+    "pf:init": "promptfoo init",
+    "verify:promptfoo": "promptfoo --version",
+    "test:promptfoo": "promptfoo eval -c promptfooconfig.yaml --env-path .env --no-write --no-cache"
+  },
+  "devDependencies": {
+    "promptfoo": "0.103.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
