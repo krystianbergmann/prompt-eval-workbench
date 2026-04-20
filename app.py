@@ -19,7 +19,6 @@ from chat_logic import MODELS, format_transcript
 
 st.set_page_config(page_title="Chat (Langfuse)", page_icon="💬")
 
-
 def init_session():
     if "session_id" not in st.session_state:
         st.session_state.session_id = str(uuid.uuid4())

@@ -1,9 +1,14 @@
-# Promptfoo: run from repo root with `npm install` then `npm run eval`.
-# Loads OPENAI_API_KEY from `.env` via the npm script (same key as the Streamlit app).
-description: Monitoring_App_3 — assistant prompt smoke tests
+# Single Promptfoo file. Run: npm run test:promptfoo
+# Needs OPENAI_API_KEY in .env (same as Streamlit).
+
+description: Prompt eval smoke tests
 
 prompts:
-  - file://promptfoo/prompts/assistant.txt
+  - |
+    You are a concise assistant. Follow any format instructions in the question.
+
+    User question:
+    {{question}}
 
 providers:
   - id: openai:chat:gpt-4o-mini
@@ -12,4 +17,23 @@ providers:
       max_tokens: 256
 
 tests:
-  - file://promptfoo/tests/smoke.yaml
+  - description: Capital of France
+    vars:
+      question: "What is the capital of France? Reply with the city name only, no punctuation."
+    assert:
+      - type: icontains
+        value: Paris
+
+  - description: Multiplication 7×8
+    vars:
+      question: "Compute 7 multiplied by 8. Reply with digits only (the number), nothing else."
+    assert:
+      - type: regex
+        value: "\\b56\\b"
+
+  - description: Home planet
+    vars:
+      question: "What planet do humans mostly live on? Reply with one word, the planet name only."
+    assert:
+      - type: icontains
+        value: Earth
