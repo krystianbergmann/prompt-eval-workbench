@@ -2,6 +2,7 @@
 Streamlit chat: solo OpenAI chat + two-model dialogues with Langfuse logging.
 """
 
+import json
 import os
 import uuid
 
@@ -15,6 +16,7 @@ from langfuse import get_client, propagate_attributes
 from openai import OpenAI
 import streamlit as st
 
+from benchmark import grade_answer, load_benchmark, pick_items, run_item_answer
 from chat_logic import MODELS, format_transcript
 
 st.set_page_config(page_title="Chat (Langfuse)", page_icon="💬")
@@ -133,8 +135,8 @@ with st.sidebar:
         else "Langfuse: **off** (set LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY in `.env`)"
     )
 
-tab_solo, tab_manual, tab_auto = st.tabs(
-    ["Solo chat", "Two models (manual)", "Automated dialogue"]
+tab_solo, tab_manual, tab_auto, tab_bench = st.tabs(
+    ["Solo chat", "Two models (manual)", "Automated dialogue", "Benchmark"]
 )
 
 with tab_solo:
@@ -259,3 +261,103 @@ with tab_auto:
                 with st.chat_message("assistant", avatar=avatar):
                     st.caption(label)
                     st.markdown(row["content"])
+
+with tab_bench:
+    st.subheader("Simple accuracy benchmark")
+    st.caption(
+        "Loads `benchmark_data.json` (edit that file to add or change cases). "
+        "Temperature 0. Pass = answer contains any substring from `must_contain_any` (see file)."
+    )
+    try:
+        bench_spec = load_benchmark()
+    except (OSError, ValueError, json.JSONDecodeError) as e:
+        bench_spec = None
+        st.error(f"Could not load benchmark dataset: {e}")
+
+    bench_model = st.selectbox("Model (benchmark)", MODELS, index=0, key="bench_model")
+    bench_system = st.text_area(
+        "System instructions (benchmark)",
+        value="You are a helpful assistant. Follow the user's format requests.",
+        height=90,
+        key="bench_system",
+    )
+
+    total_items = len(bench_spec.items) if bench_spec is not None else 0
+    bench_shuffle = False
+    bench_seed = 42
+    bench_num = 10
+    if bench_spec is not None:
+        st.markdown(
+            f"**Dataset:** {bench_spec.name} v{bench_spec.version} — "
+            f"**{total_items}** items in file."
+        )
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            bench_num = st.number_input(
+                "How many tests to run",
+                min_value=1,
+                max_value=total_items,
+                value=min(10, total_items),
+                step=1,
+                help="Takes the first N items in file order unless shuffle is on.",
+                key="bench_num",
+            )
+        with c2:
+            bench_shuffle = st.checkbox("Shuffle subset", value=False, key="bench_shuffle")
+        with c3:
+            bench_seed = st.number_input(
+                "Random seed (shuffle)",
+                min_value=0,
+                max_value=2_147_483_647,
+                value=42,
+                step=1,
+                disabled=not bench_shuffle,
+                key="bench_seed",
+            )
+
+    bench_sid = f"{st.session_state.session_id}-benchmark"
+
+    if bench_spec is not None and st.button("Run benchmark", type="primary", key="bench_run"):
+        selected = pick_items(
+            bench_spec.items,
+            max_count=int(bench_num),
+            shuffle=bench_shuffle,
+            seed=int(bench_seed) if bench_shuffle else None,
+        )
+        results_rows: list[dict] = []
+        progress = st.progress(0.0)
+        n = len(selected)
+        for i, item in enumerate(selected):
+            item_id = str(item.get("id", f"row_{i}"))
+            question = str(item.get("question", ""))
+            with st.spinner(f"Item {i + 1}/{n}: {item_id}"):
+                with propagate_attributes(
+                    session_id=bench_sid,
+                    tags=["streamlit-chat", "benchmark"],
+                    metadata={"benchmark_item_id": item_id},
+                ):
+                    text = run_item_answer(
+                        client,
+                        model=bench_model,
+                        system=bench_system,
+                        question=question,
+                    )
+                ok = grade_answer(text, item)
+            results_rows.append(
+                {
+                    "id": item_id,
+                    "pass": ok,
+                    "response": text[:500] + ("…" if len(text) > 500 else ""),
+                }
+            )
+            progress.progress((i + 1) / n)
+        progress.empty()
+        get_client().flush()
+
+        passed = sum(1 for r in results_rows if r["pass"])
+        st.caption(
+            f"Ran **{n}** of **{total_items}** items"
+            + (" (shuffled)." if bench_shuffle else " (from start of file).")
+        )
+        st.metric("Accuracy", f"{passed} / {n}", delta=f"{100.0 * passed / n:.1f}%" if n else None)
+        st.dataframe(results_rows, use_container_width=True, hide_index=True)

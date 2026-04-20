@@ -1,0 +1,324 @@
+{
+  "evalId": "eval-6Vn-2026-04-20T13:03:13",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-04-20T13:03:13.756Z",
+    "prompts": [
+      {
+        "raw": "You are a concise assistant. Follow any format instructions in the question.\n\nUser question:\n{{question}}\n",
+        "label": "You are a concise assistant. Follow any format instructions in the question.\n\nUser question:\n{{question}}\n",
+        "id": "40935571b30893ce3a1757de47f2d62017f90921d04514c84741cd4383c7066e",
+        "provider": "openai:chat:gpt-4o-mini",
+        "metrics": {
+          "score": 2,
+          "testPassCount": 2,
+          "testFailCount": 1,
+          "testErrorCount": 0,
+          "assertPassCount": 2,
+          "assertFailCount": 1,
+          "totalLatencyMs": 1626,
+          "tokenUsage": {
+            "total": 129,
+            "prompt": 126,
+            "completion": 3,
+            "cached": 0,
+            "numRequests": 3
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "cost": 0.000020700000000000002
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0.00000705,
+        "error": "Expected output to match regex \"\\b56\\b\"",
+        "gradingResult": {
+          "pass": false,
+          "score": 0,
+          "reason": "Expected output to match regex \"\\b56\\b\"",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0
+          },
+          "componentResults": [
+            {
+              "pass": false,
+              "score": 0,
+              "reason": "Expected output to match regex \"\\b56\\b\"",
+              "assertion": {
+                "type": "regex",
+                "value": "\\b56\\b"
+              }
+            }
+          ],
+          "assertion": null
+        },
+        "id": "165bdeba-19c1-4c6d-a80a-2c8be8c5972c",
+        "latencyMs": 473,
+        "namedScores": {},
+        "prompt": {
+          "raw": "You are a concise assistant. Follow any format instructions in the question.\n\nUser question:\nCompute 8 multiplied by 8. Reply with digits only (the number), nothing else.\n",
+          "label": "You are a concise assistant. Follow any format instructions in the question.\n\nUser question:\n{{question}}\n"
+        },
+        "promptId": "40935571b30893ce3a1757de47f2d62017f90921d04514c84741cd4383c7066e",
+        "promptIdx": 0,
+        "provider": {
+          "id": "openai:chat:gpt-4o-mini",
+          "label": ""
+        },
+        "response": {
+          "output": "64",
+          "tokenUsage": {
+            "total": 44,
+            "prompt": 43,
+            "completion": 1
+          },
+          "cached": false,
+          "cost": 0.00000705
+        },
+        "score": 0,
+        "success": false,
+        "testCase": {
+          "description": "Multiplication 7×8",
+          "vars": {
+            "question": "Compute 8 multiplied by 8. Reply with digits only (the number), nothing else."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\b56\\b"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 1,
+        "vars": {
+          "question": "Compute 8 multiplied by 8. Reply with digits only (the number), nothing else."
+        },
+        "metadata": {},
+        "failureReason": 1
+      },
+      {
+        "cost": 0.00000675,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "icontains",
+                "value": "Paris"
+              }
+            }
+          ],
+          "assertion": null
+        },
+        "id": "c37d698a-057d-4bd9-9c1f-9284687e3547",
+        "latencyMs": 518,
+        "namedScores": {},
+        "prompt": {
+          "raw": "You are a concise assistant. Follow any format instructions in the question.\n\nUser question:\nWhat is the capital of France? Reply with the city name only, no punctuation.\n",
+          "label": "You are a concise assistant. Follow any format instructions in the question.\n\nUser question:\n{{question}}\n"
+        },
+        "promptId": "40935571b30893ce3a1757de47f2d62017f90921d04514c84741cd4383c7066e",
+        "promptIdx": 0,
+        "provider": {
+          "id": "openai:chat:gpt-4o-mini",
+          "label": ""
+        },
+        "response": {
+          "output": "Paris",
+          "tokenUsage": {
+            "total": 42,
+            "prompt": 41,
+            "completion": 1
+          },
+          "cached": false,
+          "cost": 0.00000675
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "Capital of France",
+          "vars": {
+            "question": "What is the capital of France? Reply with the city name only, no punctuation."
+          },
+          "assert": [
+            {
+              "type": "icontains",
+              "value": "Paris"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "vars": {
+          "question": "What is the capital of France? Reply with the city name only, no punctuation."
+        },
+        "metadata": {},
+        "failureReason": 0
+      },
+      {
+        "cost": 0.0000069,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "icontains",
+                "value": "Earth"
+              }
+            }
+          ],
+          "assertion": null
+        },
+        "id": "78e77c09-85b1-4944-a4fd-72ccee79f53e",
+        "latencyMs": 635,
+        "namedScores": {},
+        "prompt": {
+          "raw": "You are a concise assistant. Follow any format instructions in the question.\n\nUser question:\nWhat planet do humans mostly live on? Reply with one word, the planet name only.\n",
+          "label": "You are a concise assistant. Follow any format instructions in the question.\n\nUser question:\n{{question}}\n"
+        },
+        "promptId": "40935571b30893ce3a1757de47f2d62017f90921d04514c84741cd4383c7066e",
+        "promptIdx": 0,
+        "provider": {
+          "id": "openai:chat:gpt-4o-mini",
+          "label": ""
+        },
+        "response": {
+          "output": "Earth",
+          "tokenUsage": {
+            "total": 43,
+            "prompt": 42,
+            "completion": 1
+          },
+          "cached": false,
+          "cost": 0.0000069
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "Home planet",
+          "vars": {
+            "question": "What planet do humans mostly live on? Reply with one word, the planet name only."
+          },
+          "assert": [
+            {
+              "type": "icontains",
+              "value": "Earth"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 2,
+        "vars": {
+          "question": "What planet do humans mostly live on? Reply with one word, the planet name only."
+        },
+        "metadata": {},
+        "failureReason": 0
+      }
+    ],
+    "stats": {
+      "successes": 2,
+      "failures": 1,
+      "errors": 0,
+      "tokenUsage": {
+        "cached": 0,
+        "completion": 3,
+        "prompt": 126,
+        "total": 129,
+        "numRequests": 3
+      }
+    }
+  },
+  "config": {
+    "description": "Prompt eval smoke tests",
+    "prompts": [
+      "You are a concise assistant. Follow any format instructions in the question.\n\nUser question:\n{{question}}\n"
+    ],
+    "providers": [
+      {
+        "id": "openai:chat:gpt-4o-mini",
+        "config": {
+          "temperature": 0,
+          "max_tokens": 256
+        }
+      }
+    ],
+    "tests": [
+      {
+        "description": "Capital of France",
+        "vars": {
+          "question": "What is the capital of France? Reply with the city name only, no punctuation."
+        },
+        "assert": [
+          {
+            "type": "icontains",
+            "value": "Paris"
+          }
+        ]
+      },
+      {
+        "description": "Multiplication 7×8",
+        "vars": {
+          "question": "Compute 8 multiplied by 8. Reply with digits only (the number), nothing else."
+        },
+        "assert": [
+          {
+            "type": "regex",
+            "value": "\\b56\\b"
+          }
+        ]
+      },
+      {
+        "description": "Home planet",
+        "vars": {
+          "question": "What planet do humans mostly live on? Reply with one word, the planet name only."
+        },
+        "assert": [
+          {
+            "type": "icontains",
+            "value": "Earth"
+          }
+        ]
+      }
+    ],
+    "sharing": true,
+    "outputPath": [
+      "promptfoo-results.json"
+    ],
+    "extensions": []
+  },
+  "shareableUrl": null
+}

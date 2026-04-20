@@ -1,6 +1,14 @@
 # Single Promptfoo file. Run: npm run test:promptfoo
 # Needs OPENAI_API_KEY in .env (same as Streamlit).
 
+# To make this test more relevant, you can:
+# - Change questions and assertions to reflect real-world, frequent, or business-specific tasks for your application.
+# - Tailor prompts to match the tone, format, or domain expertise expected from your assistant in production.
+# - Add edge cases (ambiguous/complex queries, required context-following).
+# - Increase/decrease expected conciseness, or format (`json`, bullet-points, etc.)
+# - Update providers/configs to match your actual model/deployment.
+# - Use actual user queries or support requests from your logs.
+
 description: Prompt eval smoke tests
 
 prompts:
@@ -26,7 +34,7 @@ tests:
 
   - description: Multiplication 7×8
     vars:
-      question: "Compute 7 multiplied by 8. Reply with digits only (the number), nothing else."
+      question: "Compute 8 multiplied by 8. Reply with digits only (the number), nothing else."
     assert:
       - type: regex
         value: "\\b56\\b"
@@ -37,3 +45,4 @@ tests:
     assert:
       - type: icontains
         value: Earth
+   
