@@ -17,6 +17,7 @@ from openai import OpenAI
 import streamlit as st
 
 from benchmark import grade_answer, load_benchmark, pick_items, run_item_answer
+from benchmark_scores import record_benchmark_accuracy, record_benchmark_item_pass
 from chat_logic import MODELS, format_transcript
 
 st.set_page_config(page_title="Chat (Langfuse)", page_icon="💬")
@@ -266,7 +267,8 @@ with tab_bench:
     st.subheader("Simple accuracy benchmark")
     st.caption(
         "Loads `benchmark_data.json` (edit that file to add or change cases). "
-        "Temperature 0. Pass = answer contains any substring from `must_contain_any` (see file)."
+        "Temperature 0. Pass = answer contains any substring from `must_contain_any` (see file). "
+        "Each run records Langfuse scores **`benchmark_item_pass`** (per item) and **`benchmark_accuracy`** (session)."
     )
     try:
         bench_spec = load_benchmark()
@@ -343,6 +345,12 @@ with tab_bench:
                         question=question,
                     )
                 ok = grade_answer(text, item)
+            record_benchmark_item_pass(
+                bench_sid,
+                item_id=item_id,
+                passed=ok,
+                run_index=i,
+            )
             results_rows.append(
                 {
                     "id": item_id,
@@ -352,9 +360,10 @@ with tab_bench:
             )
             progress.progress((i + 1) / n)
         progress.empty()
-        get_client().flush()
 
         passed = sum(1 for r in results_rows if r["pass"])
+        record_benchmark_accuracy(bench_sid, passed=passed, total=n)
+        get_client().flush()
         st.caption(
             f"Ran **{n}** of **{total_items}** items"
             + (" (shuffled)." if bench_shuffle else " (from start of file).")
