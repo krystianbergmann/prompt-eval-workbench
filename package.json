@@ -3,7 +3,9 @@
   "private": true,
   "description": "Streamlit chat + Langfuse; Promptfoo eval via promptfooconfig.yaml",
   "scripts": {
-    "test:promptfoo": "promptfoo eval --env-path .env --no-write --no-cache",
+    "test:promptfoo": "promptfoo eval --env-path .env --no-write --no-cache -o promptfoo-results.json",
+    "sync:langfuse": "python3 sync_promptfoo_to_langfuse.py",
+    "test:promptfoo:langfuse": "npm run test:promptfoo && npm run sync:langfuse",
     "verify:promptfoo": "promptfoo --version"
   },
   "devDependencies": {

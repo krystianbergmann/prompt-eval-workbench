@@ -1,8 +1,8 @@
 {
-  "evalId": "eval-6Vn-2026-04-20T13:03:13",
+  "evalId": "eval-cIR-2026-04-21T13:43:38",
   "results": {
     "version": 3,
-    "timestamp": "2026-04-20T13:03:13.756Z",
+    "timestamp": "2026-04-21T13:43:38.938Z",
     "prompts": [
       {
         "raw": "You are a concise assistant. Follow any format instructions in the question.\n\nUser question:\n{{question}}\n",
@@ -16,7 +16,7 @@
           "testErrorCount": 0,
           "assertPassCount": 2,
           "assertFailCount": 1,
-          "totalLatencyMs": 1626,
+          "totalLatencyMs": 2607,
           "tokenUsage": {
             "total": 129,
             "prompt": 126,
@@ -31,6 +31,78 @@
       }
     ],
     "results": [
+      {
+        "cost": 0.0000069,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "icontains",
+                "value": "Earth"
+              }
+            }
+          ],
+          "assertion": null
+        },
+        "id": "6b9bbde0-8d3d-4fa8-89c5-666809cb7d86",
+        "latencyMs": 635,
+        "namedScores": {},
+        "prompt": {
+          "raw": "You are a concise assistant. Follow any format instructions in the question.\n\nUser question:\nWhat planet do humans mostly live on? Reply with one word, the planet name only.\n",
+          "label": "You are a concise assistant. Follow any format instructions in the question.\n\nUser question:\n{{question}}\n"
+        },
+        "promptId": "40935571b30893ce3a1757de47f2d62017f90921d04514c84741cd4383c7066e",
+        "promptIdx": 0,
+        "provider": {
+          "id": "openai:chat:gpt-4o-mini",
+          "label": ""
+        },
+        "response": {
+          "output": "Earth",
+          "tokenUsage": {
+            "total": 43,
+            "prompt": 42,
+            "completion": 1
+          },
+          "cached": false,
+          "cost": 0.0000069
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "Home planet",
+          "vars": {
+            "question": "What planet do humans mostly live on? Reply with one word, the planet name only."
+          },
+          "assert": [
+            {
+              "type": "icontains",
+              "value": "Earth"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 2,
+        "vars": {
+          "question": "What planet do humans mostly live on? Reply with one word, the planet name only."
+        },
+        "metadata": {},
+        "failureReason": 0
+      },
       {
         "cost": 0.00000705,
         "error": "Expected output to match regex \"\\b56\\b\"",
@@ -58,8 +130,8 @@
           ],
           "assertion": null
         },
-        "id": "165bdeba-19c1-4c6d-a80a-2c8be8c5972c",
-        "latencyMs": 473,
+        "id": "a03f2614-5477-45e2-9fb9-b6d5469d7d9a",
+        "latencyMs": 802,
         "namedScores": {},
         "prompt": {
           "raw": "You are a concise assistant. Follow any format instructions in the question.\n\nUser question:\nCompute 8 multiplied by 8. Reply with digits only (the number), nothing else.\n",
@@ -130,8 +202,8 @@
           ],
           "assertion": null
         },
-        "id": "c37d698a-057d-4bd9-9c1f-9284687e3547",
-        "latencyMs": 518,
+        "id": "ff379183-b394-4bc5-8638-18cea28fdea4",
+        "latencyMs": 1170,
         "namedScores": {},
         "prompt": {
           "raw": "You are a concise assistant. Follow any format instructions in the question.\n\nUser question:\nWhat is the capital of France? Reply with the city name only, no punctuation.\n",
@@ -172,78 +244,6 @@
         "testIdx": 0,
         "vars": {
           "question": "What is the capital of France? Reply with the city name only, no punctuation."
-        },
-        "metadata": {},
-        "failureReason": 0
-      },
-      {
-        "cost": 0.0000069,
-        "gradingResult": {
-          "pass": true,
-          "score": 1,
-          "reason": "All assertions passed",
-          "namedScores": {},
-          "tokensUsed": {
-            "total": 0,
-            "prompt": 0,
-            "completion": 0,
-            "cached": 0
-          },
-          "componentResults": [
-            {
-              "pass": true,
-              "score": 1,
-              "reason": "Assertion passed",
-              "assertion": {
-                "type": "icontains",
-                "value": "Earth"
-              }
-            }
-          ],
-          "assertion": null
-        },
-        "id": "78e77c09-85b1-4944-a4fd-72ccee79f53e",
-        "latencyMs": 635,
-        "namedScores": {},
-        "prompt": {
-          "raw": "You are a concise assistant. Follow any format instructions in the question.\n\nUser question:\nWhat planet do humans mostly live on? Reply with one word, the planet name only.\n",
-          "label": "You are a concise assistant. Follow any format instructions in the question.\n\nUser question:\n{{question}}\n"
-        },
-        "promptId": "40935571b30893ce3a1757de47f2d62017f90921d04514c84741cd4383c7066e",
-        "promptIdx": 0,
-        "provider": {
-          "id": "openai:chat:gpt-4o-mini",
-          "label": ""
-        },
-        "response": {
-          "output": "Earth",
-          "tokenUsage": {
-            "total": 43,
-            "prompt": 42,
-            "completion": 1
-          },
-          "cached": false,
-          "cost": 0.0000069
-        },
-        "score": 1,
-        "success": true,
-        "testCase": {
-          "description": "Home planet",
-          "vars": {
-            "question": "What planet do humans mostly live on? Reply with one word, the planet name only."
-          },
-          "assert": [
-            {
-              "type": "icontains",
-              "value": "Earth"
-            }
-          ],
-          "options": {},
-          "metadata": {}
-        },
-        "testIdx": 2,
-        "vars": {
-          "question": "What planet do humans mostly live on? Reply with one word, the planet name only."
         },
         "metadata": {},
         "failureReason": 0
