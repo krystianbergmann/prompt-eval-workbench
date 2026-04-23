@@ -16,9 +16,9 @@ from langfuse import get_client, propagate_attributes
 from openai import OpenAI
 import streamlit as st
 
-from benchmark import grade_answer, load_benchmark, pick_items, run_item_answer
-from benchmark_scores import record_benchmark_accuracy, record_benchmark_item_pass
-from chat_logic import MODELS, format_transcript
+from prompt_eval_workbench.benchmark import grade_answer, load_benchmark, pick_items, run_item_answer
+from prompt_eval_workbench.benchmark_scores import record_benchmark_accuracy, record_benchmark_item_pass
+from prompt_eval_workbench.chat_logic import MODELS, format_transcript
 
 st.set_page_config(page_title="Chat (Langfuse)", page_icon="💬")
 

@@ -1,4 +1,4 @@
-"""Simple substring benchmark for LLM outputs. Dataset: benchmark_data.json"""
+"""Simple substring benchmark for LLM outputs. Dataset: data/benchmark_data.json"""
 
 from __future__ import annotations
 
@@ -8,7 +8,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-DEFAULT_DATA_PATH = Path(__file__).resolve().parent / "benchmark_data.json"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_DATA_PATH = REPO_ROOT / "data" / "benchmark_data.json"
 
 
 @dataclass(frozen=True)

@@ -1,10 +1,10 @@
 {
   "name": "prompt-eval-workbench",
   "private": true,
-  "description": "Streamlit chat + Langfuse; Promptfoo eval via promptfooconfig.yaml",
+  "description": "LLM eval workbench: Streamlit, Langfuse, Promptfoo (portfolio)",
   "scripts": {
-    "test:promptfoo": "promptfoo eval --env-path .env --no-write --no-cache -o promptfoo-results.json",
-    "sync:langfuse": "python3 sync_promptfoo_to_langfuse.py",
+    "test:promptfoo": "promptfoo eval --config config/promptfooconfig.yaml --env-path .env --no-write --no-cache -o promptfoo-results.json",
+    "sync:langfuse": "python3 -m prompt_eval_workbench.promptfoo_sync",
     "test:promptfoo:langfuse": "npm run test:promptfoo && npm run sync:langfuse",
     "verify:promptfoo": "promptfoo --version"
   },

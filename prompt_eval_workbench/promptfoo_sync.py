@@ -1,13 +1,10 @@
-#!/usr/bin/env python3
 """
-Option A: After `npm run test:promptfoo`, push scores from `promptfoo-results.json` to Langfuse.
+After `npm run test:promptfoo`, push scores from `promptfoo-results.json` to Langfuse.
 
-Usage:
-  python sync_promptfoo_to_langfuse.py
-  python sync_promptfoo_to_langfuse.py --json path/to/results.json
-  LANGFUSE_PROMPTFOO_SESSION_ID=my-ci-run python sync_promptfoo_to_langfuse.py
+Run: python3 -m prompt_eval_workbench.promptfoo_sync
+Or:  npm run sync:langfuse
 
-Requires: .env with LANGFUSE_* and OPENAI was used by promptfoo already; Langfuse keys for ingestion.
+Requires: .env with LANGFUSE_*; OpenAI was used by promptfoo already; Langfuse keys for ingestion.
 """
 
 from __future__ import annotations
@@ -26,7 +23,8 @@ load_dotenv()
 
 from langfuse import get_client  # noqa: E402
 
-DEFAULT_JSON = Path(__file__).resolve().parent / "promptfoo-results.json"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_JSON = REPO_ROOT / "promptfoo-results.json"
 
 
 def _slug(s: str, max_len: int = 80) -> str:

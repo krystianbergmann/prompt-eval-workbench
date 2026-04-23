@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prompt-eval-workbench"
+version = "0.1.0"
+description = "Streamlit LLM workbench with Langfuse observability and Promptfoo eval hooks"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "streamlit>=1.28.0",
+    "openai>=1.40.0",
+    "langfuse>=3.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0"]
+
+[tool.setuptools.packages.find]
+include = ["prompt_eval_workbench*"]

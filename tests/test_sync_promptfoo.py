@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from sync_promptfoo_to_langfuse import parse_promptfoo_results, row_item_key, row_passed
+from prompt_eval_workbench.promptfoo_sync import parse_promptfoo_results, row_item_key, row_passed
 
 
 def test_parse_promptfoo_results_shape(tmp_path: Path):

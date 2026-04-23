@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Monitoring App — Project Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #0c0f14;
+      --bg-card: #141a24;
+      --border: rgba(148, 163, 184, 0.15);
+      --text: #e8edf5;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent2: #a78bfa;
+      --radius: 14px;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+      font-synthesis: none;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .bg-gradient {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 100% 80% at 10% -20%, rgba(56, 189, 248, 0.12), transparent 50%),
+        radial-gradient(ellipse 70% 60% at 100% 0%, rgba(167, 139, 250, 0.1), transparent 45%),
+        radial-gradient(ellipse 60% 40% at 50% 100%, rgba(74, 222, 128, 0.06), transparent 50%);
+      z-index: 0;
+    }
+
+    .deck {
+      position: relative;
+      z-index: 1;
+      scroll-snap-type: y mandatory;
+      overflow-y: auto;
+      height: 100vh;
+      scrollbar-gutter: stable;
+    }
+
+    .slide {
+      min-height: 100vh;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(2rem, 5vw, 4rem);
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .slide-header {
+      margin-bottom: 1.75rem;
+    }
+
+    .kicker {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+
+    h1 {
+      font-size: clamp(1.85rem, 4vw, 2.55rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+
+    h2 {
+      font-size: clamp(1.35rem, 2.8vw, 1.75rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-top: 1.5rem;
+      margin-bottom: 0.65rem;
+    }
+
+    p, li {
+      color: var(--muted);
+      font-size: 1.02rem;
+      max-width: 62ch;
+    }
+
+    ul {
+      margin: 0.75rem 0 0 1.15rem;
+    }
+
+    li { margin-bottom: 0.5rem; }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.75rem;
+      margin-top: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .mini {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.78rem;
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.08);
+      padding: 0.2rem 0.45rem;
+      border-radius: 6px;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 1rem;
+    }
+
+    .tag {
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.1);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .tag.highlight { border-color: rgba(56, 189, 248, 0.35); color: var(--accent); }
+
+    .diagram-wrap {
+      margin-top: 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      overflow: auto;
+      box-shadow: var(--shadow);
+    }
+
+    .diagram-wrap .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      margin-top: 0.75rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    code {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.85em;
+      color: var(--accent2);
+    }
+
+    .nav {
+      position: fixed;
+      right: clamp(1rem, 3vw, 2rem);
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .nav a {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(148, 163, 184, 0.25);
+      border: 1px solid var(--border);
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .nav a:hover, .nav a:focus-visible {
+      background: var(--accent);
+      transform: scale(1.2);
+      outline: none;
+    }
+
+    .footer-hint {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.72rem;
+      color: var(--muted);
+      opacity: 0.65;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+      .nav { display: none; }
+    }
+
+    @media print {
+      .nav, .footer-hint { display: none; }
+      .deck { overflow: visible; height: auto; }
+      .slide { min-height: auto; page-break-after: always; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-gradient" aria-hidden="true"></div>
+
+  <nav class="nav" aria-label="Slide navigation">
+    <a href="#slide-0" title="Definitions"></a>
+    <a href="#slide-1" title="Title"></a>
+    <a href="#slide-2" title="Problem space"></a>
+    <a href="#slide-3" title="Unified pipeline"></a>
+    <a href="#slide-4" title="Two layers"></a>
+    <a href="#slide-5" title="Why use it"></a>
+    <a href="#slide-6" title="Observability"></a>
+    <a href="#slide-7" title="Solution"></a>
+    <a href="#slide-8" title="Data flow"></a>
+    <a href="#slide-9" title="Promptfoo scores"></a>
+    <a href="#slide-10" title="Technical"></a>
+    <a href="#slide-11" title="Best practices"></a>
+  </nav>
+
+  <div class="deck" id="deck">
+    <section class="slide" id="slide-0">
+      <div class="slide-header" style="margin-bottom: 1.25rem;">
+        <p class="kicker">Context</p>
+        <h1>Building blocks</h1>
+        <p style="margin-top: 0.5rem;">Two products this workbench brings together; each solves a different part of the LLM quality loop.</p>
+      </div>
+      <div class="grid-2">
+        <div class="card" style="margin-top: 0;">
+          <h2>What is Promptfoo?</h2>
+          <p>
+            <strong style="color: var(--text)">An open-source evaluation framework</strong> for LLM applications.
+            You define prompts, test cases, and assertions in config; it runs your provider (e.g. OpenAI) in batch,
+            grades outputs, and exports machine-readable results for CI, PRs, and regression checks.
+          </p>
+          <ul style="margin-top: 0.75rem;">
+            <li>Suite-based testing with repeatable scenarios and pass/fail (or custom) rules.</li>
+            <li>Typical for <strong style="color: var(--text)">offline / pipeline</strong> use: same inputs every run so you can diff behavior over time.</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-top: 0;">
+          <h2>What is Langfuse?</h2>
+          <p>
+            <strong style="color: var(--text)">An LLM engineering platform</strong> for observability and evaluation.
+            Your app (or eval jobs) send traces, generations, sessions, and scores; you inspect latency, cost, quality,
+            and trends in a shared UI or API.
+          </p>
+          <ul style="margin-top: 0.75rem;">
+            <li>Central place for <strong style="color: var(--text)">how the model is used in practice</strong>, not only whether a test case passed.</li>
+            <li>Supports <strong style="color: var(--text)">scores, dashboards, and drill-down</strong> so product and eng align on the same quality picture.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-1">
+      <p class="kicker">Prompt eval workbench</p>
+      <h1>Streamlit chat, Langfuse observability,<br />and repeatable LLM benchmarks</h1>
+      <p style="margin-top: 1rem;">
+        A small application that combines interactive model testing, structured offline evaluation (Promptfoo),
+        and scores in Langfuse so you can see quality and regressions in one place.
+      </p>
+      <div class="tag-row">
+        <span class="tag highlight">Streamlit</span>
+        <span class="tag">OpenAI</span>
+        <span class="tag">Langfuse</span>
+        <span class="tag">Promptfoo</span>
+        <span class="tag">pytest</span>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-2">
+      <div class="slide-header">
+        <p class="kicker">Perspective 1</p>
+        <h1>Problem space</h1>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2>What is hard?</h2>
+          <ul>
+            <li><strong style="color: var(--text)">Black-box LLMs</strong> — behavior shifts with prompts, models, and temperature.</li>
+            <li><strong style="color: var(--text)">No single metric</strong> — you need traces for debugging and aggregate scores for trends.</li>
+            <li><strong style="color: var(--text)">Manual chat ≠ CI</strong> — exploratory UI must pair with repeatable tests and exportable results.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>What this project optimizes for</h2>
+          <ul>
+            <li><strong style="color: var(--text)">Observability</strong> — sessions, tags, and flushing traces to Langfuse during chat and benchmarks.</li>
+            <li><strong style="color: var(--text)">Comparable runs</strong> — benchmark JSON + Promptfoo configs + shared grading hooks.</li>
+            <li><strong style="color: var(--text)">Actionable dashboards</strong> — explicit score names you can filter in Langfuse (<code>benchmark_*</code>, <code>promptfoo_*</code>).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-3">
+      <div class="slide-header">
+        <p class="kicker">Perspective 1 — integration</p>
+        <h1>Why a unified pipeline for Promptfoo and Langfuse?</h1>
+        <p style="margin-top: 0.65rem;">
+          Promptfoo answers <strong style="color: var(--text)">“did the tests pass?”</strong> in CI;
+          Langfuse answers <strong style="color: var(--text)">“what happened, and how does quality trend?”</strong>
+          for live and batched work. Wiring them together avoids two parallel stories about the same product.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" style="margin-top: 0;">
+          <h2>One place for quality signal</h2>
+          <ul>
+            <li><strong style="color: var(--text)">Same vocabulary</strong> — offline eval scores sit next to session-scoped app and benchmark metrics instead of living in a separate spreadsheet or report.</li>
+            <li><strong style="color: var(--text)">Comparable over time</strong> — Promptfoo runs become first-class rows in Langfuse Scores, so regressions from pipeline changes show up where ops and eng already look.</li>
+            <li><strong style="color: var(--text)">Less context switching</strong> — no hand-off between “the eval tool” and “the observability tool” when you triage a drop in pass rate.</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-top: 0;">
+          <h2>What each layer adds</h2>
+          <ul>
+            <li><strong style="color: var(--text)">Promptfoo</strong> — deterministic suites, assertions, and machine-readable output suited to automation and PR gates.</li>
+            <li><strong style="color: var(--text)">Langfuse</strong> — traces, sessions, tags, and dashboards for human analysis and stakeholder review.</li>
+            <li><strong style="color: var(--text)">The link</strong> — a short sync path from eval results to Langfuse keeps batch results <strong style="color: var(--text)">actionable</strong> without re-implementing observability inside Promptfoo.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-4">
+      <div class="slide-header">
+        <p class="kicker">Perspective 1 — layers</p>
+        <h1>Why keep both Promptfoo and Langfuse?</h1>
+        <p style="margin-top: 0.65rem;">
+          They are <strong style="color: var(--text)">complementary, not redundant</strong>: one layer gates changes and holds benchmarks steady;
+          the other watches real usage and how quality moves over time. Keep both in the stack.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" style="margin-top: 0; border-color: rgba(74, 222, 128, 0.22);">
+          <h2>Promptfoo</h2>
+          <p style="font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.6rem;">Offline · gates · suites</p>
+          <ul>
+            <li><strong style="color: var(--text)">Regression testing</strong> — the same cases run again after every prompt, model, or app change.</li>
+            <li><strong style="color: var(--text)">CI</strong> — pass/fail signal in the pipeline, scriptable, machine-readable, PR-friendly.</li>
+            <li><strong style="color: var(--text)">Controlled benchmarks</strong> — fixed test sets and rubrics, so you know <em>what</em> you’re measuring.</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-top: 0; border-color: rgba(167, 139, 250, 0.25);">
+          <h2>Langfuse</h2>
+          <p style="font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.6rem;">Live · product · time series</p>
+          <ul>
+            <li><strong style="color: var(--text)">Production evaluation</strong> — what the assistant actually does for users, not only in lab tests.</li>
+            <li><strong style="color: var(--text)">Observability</strong> — traces, sessions, and context to debug a bad outcome end to end.</li>
+            <li><strong style="color: var(--text)">Trend tracking</strong> — how latency, cost, and scores move as you ship; spot drift without running a new suite by hand every time.</li>
+            <li><strong style="color: var(--text)">Light scoring</strong> — app and eval scores in one place for dashboards, not a second analytics silo.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-5">
+      <div class="slide-header">
+        <p class="kicker">Rationale</p>
+        <h1>Why use it? Why implement?</h1>
+        <p style="margin-top: 0.65rem;">
+          Value for <strong style="color: var(--text)">people running evals</strong> vs. reasons to
+          <strong style="color: var(--text)">adopt or build</strong> this pattern in your own stack.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" style="margin-top: 0;">
+          <h2>Why use it?</h2>
+          <ul>
+            <li><strong style="color: var(--text)">One loop</strong> — explore in chat, stress-test in the benchmark, and ship Promptfoo runs without switching tools for every task.</li>
+            <li><strong style="color: var(--text)">Faster debugging</strong> — Langfuse ties sessions, tags, and scores so you can go from a bad score to the trace, not a dead log file.</li>
+            <li><strong style="color: var(--text)">Regressions you can see</strong> — <code>benchmark_*</code> and <code>promptfoo_*</code> land in the same product you already use for monitoring.</li>
+            <li><strong style="color: var(--text)">Model comparison</strong> — two-model mode supports side-by-side behavior checks before you pick a default model.</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-top: 0;">
+          <h2>Why implement (this design)?</h2>
+          <ul>
+            <li><strong style="color: var(--text)">Small, inspectable surface</strong> — Streamlit UI + a few Python modules; easy to change prompts, data, and scoring rules.</li>
+            <li><strong style="color: var(--text)">CI-friendly evals</strong> — Promptfoo writes JSON; a short sync script posts scores to Langfuse so pipelines stay scriptable.</li>
+            <li><strong style="color: var(--text)">Boring, portable stack</strong> — OpenAI + Langfuse + env-based config: the same skills transfer to other apps.</li>
+            <li><strong style="color: var(--text)">Tests as documentation</strong> — pytest around benchmark logic and sync gives safety when you extend the workbench.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-6">
+      <div class="slide-header">
+        <p class="kicker">Instrumentation</p>
+        <h1>Observability points</h1>
+        <p style="margin-top: 0.65rem;">
+          What the workbench <strong style="color: var(--text)">records in Langfuse</strong>: not generic logging, but
+          <strong style="color: var(--text)">traces, session boundaries, classifiers, and named scores</strong> aligned
+          to product and eval workflows.
+        </p>
+      </div>
+
+      <div class="card" style="margin-top: 0;">
+        <h2>Signal map</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Point</th>
+              <th>What is captured</th>
+              <th>How it appears</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color: var(--text)">Generations &amp; requests</strong></td>
+              <td>OpenAI chat completion calls (solo, duel turns, benchmark items) via the Langfuse-wrapped client.</td>
+              <td>Traces and generations in Langfuse; <code>flush()</code> after key UI actions so data is visible promptly.</td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--text)">Session scope</strong></td>
+              <td>Isolated runs: browser session, duel (<code>…-duel</code>), benchmark (<code>…-benchmark</code>), or Promptfoo eval (<code>promptfoo-…</code> / custom id).</td>
+              <td>Filter and compare runs in the Langfuse <strong>session</strong> view without cross-talk between flows.</td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--text)">Tags &amp; routes</strong></td>
+              <td>Consistent tag <code>streamlit-chat</code> plus a route tag: <code>solo</code>, <code>duel-manual</code>, <code>duel-auto</code>, or <code>benchmark</code>.</td>
+              <td>Slice traffic by interaction type when reviewing traces or building dashboards.</td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--text)">Context metadata</strong></td>
+              <td>Speaker label for duels, benchmark item id for each graded row; Promptfoo rows carry <code>eval_id</code> and test keys in score metadata.</td>
+              <td>Link scores and traces to the <strong>exact turn or test case</strong> that produced them.</td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--text)">Quality metrics (scores)</strong></td>
+              <td>Numeric 0/1 and aggregate accuracy: <code>benchmark_item_pass</code>, <code>benchmark_accuracy</code>; <code>promptfoo_item_pass</code>, <code>promptfoo_accuracy</code> after sync.</td>
+              <td>Time-series and breakdowns in Langfuse <strong>Scores</strong>; filter by name and session.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-7">
+      <div class="slide-header">
+        <p class="kicker">Perspective 2</p>
+        <h1>Solution scheme</h1>
+        <p style="margin-top: 0.65rem;">
+          Two paths converge on Langfuse: <strong style="color: var(--text)">live app instrumentation</strong> and
+          <strong style="color: var(--text)">offline eval → JSON → score sync</strong>.
+        </p>
+      </div>
+
+      <div class="diagram-wrap">
+        <pre class="mermaid">
+flowchart TB
+  subgraph UI["Interactive UI (Streamlit)"]
+    S[Solo chat]
+    D[Two-model dialogue]
+    B[Benchmark tab]
+  end
+
+  subgraph Models["Models"]
+    OAI[("OpenAI API\n(chat completions)")]
+  end
+
+  subgraph LF["Langfuse"]
+    T[Traces / sessions]
+    SC[Scores API]
+  end
+
+  subgraph CLI["Offline evaluation"]
+    PF[Promptfoo eval]
+    JSON[("promptfoo-results.json")]
+    SYNC["sync_promptfoo_to_langfuse.py"]
+  end
+
+  S --> OAI
+  D --> OAI
+  B --> OAI
+  OAI --> T
+  B --> SC
+
+  PF --> JSON
+  JSON --> SYNC
+  SYNC --> SC
+
+  style UI fill:#141a24,stroke:#38bdf8,color:#e8edf5
+  style LF fill:#141a24,stroke:#a78bfa,color:#e8edf5
+  style CLI fill:#141a24,stroke:#4ade80,color:#e8edf5
+        </pre>
+      </div>
+      <p style="margin-top: 1rem; font-size: 0.95rem;">
+        <span class="mini">benchmark_item_pass · benchmark_accuracy</span> come from the Streamlit benchmark.
+        <span class="mini">promptfoo_item_pass · promptfoo_accuracy</span> come from the sync script after Promptfoo runs.
+      </p>
+    </section>
+
+    <section class="slide" id="slide-8">
+      <div class="slide-header">
+        <p class="kicker">Perspective 3 — detail</p>
+        <h1>Data flow</h1>
+        <p style="margin-top: 0.65rem;">
+          What moves between components: <strong style="color: var(--text)">user &amp; file inputs</strong>,
+          <strong style="color: var(--text)">model I/O</strong>, and
+          <strong style="color: var(--text)">artifacts</strong> written to disk or to Langfuse.
+        </p>
+      </div>
+
+      <div class="diagram-wrap">
+        <pre class="mermaid">
+flowchart LR
+  subgraph act["Live app (Streamlit)"]
+    U[("User / browser")]
+    ST["app.py\nStreamlit"]
+    U -->|messages, topic| ST
+  end
+
+  subgraph files["File inputs"]
+    BJ[("benchmark_data.json")]
+    ENV[(".env keys")]
+  end
+
+  subgraph llm["Model"]
+    OAI[("OpenAI\nchat.completions")]
+  end
+
+  subgraph obs["Observability & scores"]
+    LF[("Langfuse\ncloud")]
+  end
+
+  subgraph offline["Offline eval"]
+    PFC[("promptfooconfig.yaml")]
+    PF["Promptfoo CLI"]
+    RES[("promptfoo-results.json")]
+    SYNC[("sync_promptfoo_to_langfuse.py")]
+  end
+
+  BJ -->|load items| ST
+  ENV --> ST
+  ENV --> PF
+  ENV --> SYNC
+  ST -->|requests, system prompts| OAI
+  OAI -->|completions| ST
+  ST -.->|traces, flush| LF
+  ST -->|benchmark_* scores| LF
+
+  PFC --> PF
+  PF -->|eval| OAI
+  PF -->|write| RES
+  RES -->|read pass or fail| SYNC
+  SYNC -->|promptfoo_* scores| LF
+        </pre>
+      </div>
+      <p style="margin-top: 1rem; font-size: 0.92rem; color: var(--muted); max-width: 70ch;">
+        <strong style="color: var(--text)">Solid lines</strong> are request/response or file hand-offs.
+        <strong style="color: var(--text)">Dotted</strong> is tracing alongside the same OpenAI calls. Benchmark and Promptfoo paths are independent: both can land quality scores in Langfuse with different
+        <span class="mini">session_id</span> conventions.
+      </p>
+    </section>
+
+    <section class="slide" id="slide-9">
+      <div class="slide-header">
+        <p class="kicker">Interpretation</p>
+        <h1>Promptfoo scores in Langfuse</h1>
+        <p style="margin-top: 0.65rem;">
+          After the sync step, you read <strong style="color: var(--text)">named scores</strong> in Langfuse tied to a
+          <strong style="color: var(--text)">session</strong>—this slide is a compact guide to that reading.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" style="margin-top: 0;">
+          <h2>Two score types (from the sync script)</h2>
+          <ul>
+            <li>
+              <strong style="color: var(--text)"><code>promptfoo_item_pass</code></strong> — numeric, usually <code>0</code> or <code>1</code>;
+              one per test row. <code>1</code> = that row passed Promptfoo’s grading; use for <strong style="color: var(--text)">which cases failed</strong>.
+            </li>
+            <li>
+              <strong style="color: var(--text)"><code>promptfoo_accuracy</code></strong> — <code>0.0</code>–<code>1.0</code>;
+              one per eval upload. Value = passed rows ÷ total rows; the <strong style="color: var(--text)">headline for the full run</strong> when the filter is one session.
+            </li>
+            <li>
+              Extras: comments and <strong style="color: var(--text)">metadata</strong> (e.g. <code>eval_id</code>, test keys) help map scores back to the JSON and CI run.
+            </li>
+          </ul>
+        </div>
+        <div class="card" style="margin-top: 0;">
+          <h2>Session &amp; “tracing” in this path</h2>
+          <p>
+            Scores attach to a <span class="mini">session_id</span> you set via env, CLI, or the default
+            <code>promptfoo-{evalId}</code> so <strong style="color: var(--text)">one Promptfoo run = one session slice</strong> in the UI.
+          </p>
+          <ul style="margin-top: 0.65rem;">
+            <li><strong style="color: var(--text)">In Sessions / Scores</strong> — filter to that id to see one upload without mixing other runs.</li>
+            <li><strong style="color: var(--text)">Aggregated Scores view</strong> — averages and counts roll up <em>across the time range</em>; they mix many runs unless you narrow filters.</li>
+            <li><strong style="color: var(--text)">Dotted “tracing” in the app</strong> — Streamlit + <code>langfuse.openai</code> send live generations to Langfuse; Promptfoo in CI usually does <strong style="color: var(--text)">scores only</strong> unless you also instrument those calls—same product, different path.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 1rem;">
+        <h2>Mental model: what to open for which question</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Question</th>
+              <th>What to use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Did <strong style="color: var(--text)">this</strong> full eval do well?</td>
+              <td><code>promptfoo_accuracy</code> for the <strong>correct session</strong> (and time window).</td>
+            </tr>
+            <tr>
+              <td>Which <strong style="color: var(--text)">individual tests</strong> failed?</td>
+              <td><code>promptfoo_item_pass</code> and metadata; drill from Scores or session detail.</td>
+            </tr>
+            <tr>
+              <td>Is this <strong style="color: var(--text)">comparable</strong> to the last run?</td>
+              <td>Same <code>session_id</code> convention, same <code>eval_id</code> in metadata, and a clear baseline window.</td>
+            </tr>
+            <tr>
+              <td>What does a <strong style="color: var(--text)">0/1</strong> pattern on item passes show?</td>
+              <td>Per-row pass rate; the aggregate row should line up with <code>promptfoo_accuracy</code> for that run.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="margin-top: 0.9rem; font-size: 0.92rem; color: var(--muted); max-width: 70ch;">
+          <strong style="color: var(--text)">Headline</strong> = one run’s <code>promptfoo_accuracy</code>;
+          <strong style="color: var(--text)">debug</strong> = item passes + metadata. Always fix the <strong>session and date filter</strong> before comparing numbers.
+        </p>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-10">
+      <div class="slide-header">
+        <p class="kicker">Perspective 4</p>
+        <h1>Technical implementation</h1>
+      </div>
+
+      <div class="card">
+        <h2>Stack</h2>
+        <table>
+          <thead>
+            <tr><th>Layer</th><th>Choice</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>UI</td><td>Streamlit — tabs for solo chat, manual/auto two-model duels, benchmark</td></tr>
+            <tr><td>LLM</td><td>OpenAI Python SDK; <code>langfuse.openai</code> import for instrumentation</td></tr>
+            <tr><td>Observability</td><td>Langfuse <code>get_client()</code>, <code>propagate_attributes</code> (session, tags, metadata), <code>flush()</code></td></tr>
+            <tr><td>Benchmark</td><td><code>benchmark_data.json</code>, <code>grade_answer</code> via <code>must_contain_any</code></td></tr>
+            <tr><td>CLI eval</td><td>Promptfoo (<code>promptfooconfig.yaml</code>) → <code>npm run test:promptfoo</code></td></tr>
+            <tr><td>Scores sync</td><td><code>sync_promptfoo_to_langfuse.py</code> reads JSON, calls <code>create_score</code></td></tr>
+            <tr><td>Tests</td><td>pytest — <code>tests/test_benchmark.py</code>, <code>test_chat_logic.py</code>, <code>test_sync_promptfoo.py</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card" style="margin-top: 1rem;">
+        <h2>Commands (from repo root)</h2>
+        <table>
+          <tbody>
+            <tr><td style="width: 40%;">App</td><td><code>streamlit run app.py</code></td></tr>
+            <tr><td>Promptfoo only</td><td><code>npm run test:promptfoo</code></td></tr>
+            <tr><td>Push Promptfoo scores to Langfuse</td><td><code>npm run sync:langfuse</code></td></tr>
+            <tr><td>Eval + sync</td><td><code>npm run test:promptfoo:langfuse</code></td></tr>
+            <tr><td>Python tests</td><td><code>python3 -m pytest tests/</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-11">
+      <div class="slide-header">
+        <p class="kicker">Guidance</p>
+        <h1>Pipeline best practices</h1>
+        <p style="margin-top: 0.65rem;">
+          Principles for <strong style="color: var(--text)">credible evaluation</strong> and
+          <strong style="color: var(--text)">durable operations</strong>—not a checklist of tools.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" style="margin-top: 0; border-color: rgba(74, 222, 128, 0.25);">
+          <h2>What to do</h2>
+          <ul>
+            <li><strong style="color: var(--text)">Align evals with reality</strong> — measure the tasks and constraints that actually matter in production, not a toy that scores well.</li>
+            <li><strong style="color: var(--text)">Keep comparisons fair</strong> — change one thing at a time, or be explicit about what changed when you compare runs.</li>
+            <li><strong style="color: var(--text)">Unify signal</strong> — put interactive traces and batch scores in the same observability story so teams share one view of quality.</li>
+            <li><strong style="color: var(--text)">Govern like prod</strong> — credentials, data, and access deserve the same discipline as your shipping systems.</li>
+            <li><strong style="color: var(--text)">Act on both drill-down and roll-up</strong> — use aggregates for trends, dig into individual failures for root cause.</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-top: 0; border-color: rgba(248, 113, 113, 0.2);">
+          <h2>What to avoid</h2>
+          <ul>
+            <li><strong style="color: var(--text)">The single headline number</strong> — a pass rate without context, variance, or failure modes can mislead every stakeholder.</li>
+            <li><strong style="color: var(--text)">Orphaned automation</strong> — evaluations that never feed the same dashboards and reviews as live traffic.</li>
+            <li><strong style="color: var(--text)">Reward hacking the rubric</strong> — if the system optimizes the metric instead of the user outcome, the metric is wrong.</li>
+            <li><strong style="color: var(--text)">Silent change</strong> — shifting models, prompts, or policies without a record of what the baseline was.</li>
+            <li><strong style="color: var(--text)">Treating eval as a gate only</strong> — a pipeline that only blocks releases misses the point of learning why behavior changed.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <p class="footer-hint">Scroll or use sidebar dots · Open this file in any browser</p>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "dark",
+      securityLevel: "strict",
+      fontFamily: "DM Sans",
+      themeVariables: {
+        primaryColor: "#141a24",
+        primaryTextColor: "#e8edf5",
+        primaryBorderColor: "#38bdf8",
+        lineColor: "#64748b",
+        secondaryColor: "#1e293b",
+        tertiaryColor: "#0c0f14",
+      },
+    });
+  </script>
+</body>
+</html>

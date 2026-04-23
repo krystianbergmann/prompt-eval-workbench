@@ -2,7 +2,7 @@
 
 import json
 
-from benchmark import DEFAULT_DATA_PATH, grade_answer, load_benchmark, pick_items
+from prompt_eval_workbench.benchmark import DEFAULT_DATA_PATH, grade_answer, load_benchmark, pick_items
 
 
 def test_load_benchmark_default_path():

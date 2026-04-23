@@ -1,4 +1,5 @@
-# Single Promptfoo file. Run: npm run test:promptfoo
+# Config lives in config/promptfooconfig.yaml. Run from repo root:
+#   npm run test:promptfoo
 # Then push scores to Langfuse: npm run sync:langfuse (reads promptfoo-results.json)
 # Needs OPENAI_API_KEY in .env (same as Streamlit).
 

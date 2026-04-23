@@ -1,6 +1,6 @@
 """Tests for pure helpers used by app.py."""
 
-from chat_logic import MODELS, format_transcript
+from prompt_eval_workbench.chat_logic import MODELS, format_transcript
 
 
 def test_format_transcript_empty():
