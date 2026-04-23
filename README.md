@@ -1,52 +1,99 @@
 # Prompt eval workbench
 
-**Problem → solution portfolio piece:** a small end-to-end pattern for **observing** LLM apps in production-like conditions, **measuring** quality with repeatable suites, and **unifying** CI evals (Promptfoo) with observability (Langfuse)—so leaders and ICs share one narrative on quality.
+**Streamlit chat, Langfuse observability, and repeatable LLM benchmarks** — a small app that combines interactive model testing, structured offline evaluation (Promptfoo), and scores in Langfuse so quality and regressions live in one place.
+
+**Stack:** Streamlit · OpenAI · Langfuse · Promptfoo · pytest
+
+For the full narrative (slides on problem space, diagrams, score semantics, and pipeline practices), open **[docs/presentation/index.html](docs/presentation/index.html)** in a browser. This README mirrors that deck in shorter form and adds setup and layout.
 
 ---
 
-## Executive summary
+## Building blocks
 
-| | |
-|---|---|
-| **Problem** | LLM behavior is opaque; ad-hoc chat and one-off scripts do not scale for **regression control**, **trend visibility**, or **cross-team alignment**. |
-| **Approach** | A **Streamlit** workbench for exploration and in-app benchmarks; **Promptfoo** for gated, versioned evals; **Langfuse** for traces, sessions, and scores—wired so batch results are not siloed from monitoring. |
-| **Outcome** | One place to ask “did we break anything?” (CI) and “what happened in the wild?” (observability), with **named scores** suitable for dashboards and reviews. |
+**Promptfoo** is an open-source evaluation framework: prompts, test cases, and assertions in config; batch runs against your provider; machine-readable results for CI, PRs, and regression checks. It fits **offline / pipeline** work — same inputs every run so you can diff behavior over time.
+
+**Langfuse** is an LLM engineering platform for observability and evaluation: traces, generations, sessions, and scores in a shared UI or API. It answers **how the model is used in practice**, with **scores and dashboards** so product and engineering align on the same quality picture.
+
+Together they are **complementary, not redundant**: Promptfoo gates changes and keeps benchmarks steady; Langfuse watches usage and how quality moves over time.
 
 ---
 
-## What this repository contains
+## Problem space
 
-- **Interactive layer** — Solo chat, two-model dialogues (manual / automated), optional model comparison before standardizing on a provider.
-- **Measurement layer** — Curated dataset under `data/`, simple rubric (`must_contain_any`), per-item and aggregate scores in Langfuse.
-- **Automation layer** — Promptfoo config under `config/`, JSON results, sync of pass/fail and accuracy into Langfuse for portfolio- and CI-friendly runs.
-- **Quality bar** — `pytest` for benchmark logic and Promptfoo JSON parsing (no live API required in tests).
+| What is hard? | What this project optimizes for |
+|----------------|----------------------------------|
+| **Black-box LLMs** — behavior shifts with prompts, models, and temperature. | **Observability** — sessions, tags, and flushing traces to Langfuse during chat and benchmarks. |
+| **No single metric** — you need traces for debugging and aggregate scores for trends. | **Comparable runs** — benchmark JSON, Promptfoo config, and shared grading hooks. |
+| **Manual chat ≠ CI** — exploratory UI must pair with repeatable tests and exportable results. | **Actionable dashboards** — explicit score names in Langfuse (`benchmark_*`, `promptfoo_*`). |
 
-**Architecture (one diagram):** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — Mermaid system view (renders on GitHub).
+---
 
-For a **walkthrough deck** (problem space, architecture, observability, best practices), open `docs/presentation/index.html` in a browser.
+## Why wire Promptfoo and Langfuse?
+
+Promptfoo answers **“did the tests pass?”** in CI; Langfuse answers **“what happened, and how does quality trend?”** for live and batched work. Wiring them avoids two parallel stories about the same product.
+
+- **Same vocabulary** — offline eval scores sit next to session-scoped app and benchmark metrics.
+- **Comparable over time** — Promptfoo runs become first-class Langfuse scores so pipeline regressions show up where teams already look.
+- **Less context switching** — no hand-off between “the eval tool” and “the observability tool” when triaging a drop in pass rate.
+
+**Why keep both?** Promptfoo: regression testing, CI signal, controlled benchmarks. Langfuse: production-style evaluation, traces and sessions, trend tracking, light scoring in one place for dashboards.
+
+---
+
+## Why use it / why this design?
+
+**Operators** — one loop (chat, in-app benchmark, Promptfoo); faster debugging via sessions, tags, and scores; regressions visible as `benchmark_*` and `promptfoo_*` in Langfuse; two-model mode for side-by-side checks before standardizing a model.
+
+**Implementers** — small, inspectable surface (Streamlit + a few Python modules); CI-friendly evals (Promptfoo → JSON → short sync script → Langfuse); portable stack (OpenAI + Langfuse + env-based config); pytest around benchmark logic and sync for safe extension.
+
+---
+
+## Observability (what lands in Langfuse)
+
+| Point | What is captured | How it appears |
+|--------|-------------------|----------------|
+| **Generations** | OpenAI chat completions (solo, duel, benchmark) via the Langfuse-wrapped client. | Traces and generations; `flush()` after key UI actions. |
+| **Session scope** | Browser session, duel (`…-duel`), benchmark (`…-benchmark`), or Promptfoo eval (`promptfoo-…` / custom id). | Filter runs in Langfuse **Sessions** without cross-talk. |
+| **Tags & routes** | Tag `streamlit-chat` plus route: `solo`, `duel-manual`, `duel-auto`, `benchmark`. | Slice traces by interaction type. |
+| **Context metadata** | Duel speaker label; benchmark item id; Promptfoo rows carry `eval_id` and test keys in score metadata. | Link scores and traces to the exact turn or test case. |
+| **Scores** | `benchmark_item_pass`, `benchmark_accuracy`; after sync, `promptfoo_item_pass`, `promptfoo_accuracy`. | Langfuse **Scores** — filter by name and session. |
+
+---
+
+## Solution outline
+
+Two paths converge on Langfuse: **live app instrumentation** (Streamlit → OpenAI → traces) and **offline eval → JSON → score sync** (`promptfoo-results.json` → `prompt_eval_workbench.promptfoo_sync`).
+
+**Diagram (renders on GitHub):** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
+**Data flow (short):** `data/benchmark_data.json` and `.env` feed the app; `config/promptfooconfig.yaml` drives Promptfoo; the CLI writes `promptfoo-results.json`; the sync module posts `promptfoo_*` scores. Benchmark scores are written from the app path. Solid lines are requests/files; tracing sits alongside the same OpenAI calls (see architecture doc).
+
+### Reading Promptfoo scores in Langfuse
+
+- **`promptfoo_item_pass`** — numeric per test row (typically 0/1); use to see **which cases failed**.
+- **`promptfoo_accuracy`** — 0.0–1.0 for the full run (passed ÷ total); **headline** for one eval when filtered to one session.
+- **Session** — set via env (`LANGFUSE_PROMPTFOO_SESSION_ID`), CLI, or default `promptfoo-{evalId}` so **one Promptfoo run ≈ one session slice**. Fix **session and time filters** before comparing runs. Streamlit paths send live generations; Promptfoo in CI is usually **scores-first** unless you instrument those calls too.
 
 ---
 
 ## Repository layout
 
 ```text
-├── app.py                      # Streamlit entrypoint (run from repo root)
-├── prompt_eval_workbench/      # Application library
-│   ├── benchmark.py            # Dataset load, grading, single-item generation
-│   ├── benchmark_scores.py     # Langfuse scores for in-app benchmark runs
-│   ├── chat_logic.py           # Shared formatting / model list
-│   └── promptfoo_sync.py       # Promptfoo JSON → Langfuse scores (CLI module)
-├── data/
-│   └── benchmark_data.json     # Editable eval cases
-├── config/
-│   └── promptfooconfig.yaml    # Promptfoo suite
+├── app.py                         # Streamlit entrypoint (run from repo root)
+├── prompt_eval_workbench/
+│   ├── benchmark.py               # Dataset, grading, single-item generation
+│   ├── benchmark_scores.py        # Langfuse scores for in-app benchmark
+│   ├── chat_logic.py              # Shared formatting / model list
+│   └── promptfoo_sync.py          # Promptfoo JSON → Langfuse scores (CLI)
+├── data/benchmark_data.json       # Editable eval cases
+├── config/promptfooconfig.yaml    # Promptfoo suite
 ├── docs/
-│   ├── ARCHITECTURE.md         # System diagram (Mermaid)
-│   └── presentation/
-│       └── index.html          # Static portfolio deck
+│   ├── ARCHITECTURE.md            # System diagram (Mermaid)
+│   └── presentation/index.html    # Full walkthrough deck
 ├── tests/
 ├── requirements.txt
-└── package.json                # Promptfoo npm scripts
+├── pyproject.toml                 # Package metadata + deps
+└── package.json                   # Promptfoo npm scripts
 ```
 
 ---
@@ -67,7 +114,7 @@ cp .env.example .env   # add OPENAI_* and LANGFUSE_*
 streamlit run app.py
 ```
 
-**3. Optional: Promptfoo + Langfuse sync** (requires Node for Promptfoo)
+**3. Optional: Promptfoo + Langfuse sync** (Node 18+)
 
 ```bash
 npm install
@@ -80,22 +127,42 @@ npm run test:promptfoo:langfuse
 python3 -m pytest tests/ -q
 ```
 
+### Commands (from repo root)
+
+| | |
+|--|--|
+| App | `streamlit run app.py` |
+| Promptfoo only | `npm run test:promptfoo` |
+| Push Promptfoo scores to Langfuse | `npm run sync:langfuse` |
+| Eval + sync | `npm run test:promptfoo:langfuse` |
+| Python tests | `python3 -m pytest tests/` |
+
 ---
 
-## Design choices (for reviewers)
+## Technical stack
 
-- **Separation of concerns** — UI and “lab” flows in Streamlit; **deterministic** suites in Promptfoo; **telemetry and scores** in Langfuse. The sync step exists so **CI and observability share a vocabulary**, not two competing reports.
-- **Explicit score names** — `benchmark_*` vs `promptfoo_*` keeps session-level analysis unambiguous.
-- **Small, auditable surface** — Favor readable Python and config over framework depth, so scope of change is obvious in review.
+| Layer | Choice |
+|-------|--------|
+| UI | Streamlit — solo chat, manual/auto two-model duels, benchmark tab |
+| LLM | OpenAI Python SDK; `langfuse.openai` for instrumentation |
+| Observability | Langfuse `get_client()`, `propagate_attributes`, `flush()` |
+| Benchmark | `data/benchmark_data.json`, `must_contain_any` grading |
+| CLI eval | Promptfoo + `config/promptfooconfig.yaml` → `npm run test:promptfoo` |
+| Scores sync | `prompt_eval_workbench/promptfoo_sync.py` reads JSON, `create_score` |
+| Tests | pytest — `tests/test_benchmark.py`, `test_chat_logic.py`, `test_sync_promptfoo.py` |
+
+Requires **Python 3.11+** and **Node 18+** (for Promptfoo CLI).
 
 ---
 
-## Tech stack
+## Pipeline practices (from the deck)
 
-Python 3.11+ · Streamlit · OpenAI API · Langfuse · Promptfoo · pytest · Node 18+ (dev, for Promptfoo CLI)
+**Do:** align evals with real tasks; change one thing at a time when comparing runs; unify interactive traces and batch scores in one observability story; treat credentials and data like production; use aggregates for trends and drill into failures for root cause.
+
+**Avoid:** a single headline metric without context; automation that never reaches the same dashboards as live traffic; rubrics that reward the wrong behavior; silent model or prompt changes without a baseline; evals that only gate releases without learning *why* behavior changed.
 
 ---
 
 ## License
 
-Use and adapt for your portfolio as needed; ensure your own API keys and Langfuse project stay private.
+Use and adapt for your portfolio as needed; keep your own API keys and Langfuse project private.
